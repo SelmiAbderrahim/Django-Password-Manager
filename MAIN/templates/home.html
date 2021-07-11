@@ -1,0 +1,148 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Password Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="{% static 'main.js' %}" defer></script>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <div class="brand"><a href=""><i class="fa fa-lock" aria-hidden="true"></i>&nbsp;Password Manager</a></div>
+            <ul>
+                <li><a href="">Home</a></li>
+                {% if request.user.is_anonymous %}
+                <li><a href="javascript:;" onclick="displayModal('login-modal');">Login</a></li>
+                <li><a href="javascript:;" onclick="displayModal('signup-modal');">SignUp</a></li>
+                {% else %}
+                <li><a href="javascript:;" onclick="document.getElementById('logout-btn').click();">Logout</a></li>
+                <form hidden="true" action="." method="POST">
+                    {% csrf_token %}
+                    <input type="submit" id="logout-btn" name="logout">
+                </form>
+
+                <li><a href="javascript:;" onclick="displayModal('password-modal');">View</a></li>
+                <li><a href="javascript:;" onclick="displayModal('add-password-modal');">Add</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <!--Display messages-->
+    {% if messages %}
+      <div class="messages" style="text-align: center;">
+          {% for message in messages %}
+            <p>
+                {% if message.tags == "error" %}
+                  <i class="fa fa-exclamation" aria-hidden="true"></i>
+                  {% else %}
+                  <i class="fa fa-check" aria-hidden="true"></i>
+                {% endif %}
+                &nbsp;{{message}}
+            </p>
+          {% endfor %}
+      </div>
+    {% endif %}
+
+    <!--Confirm email-->
+      {% if code %}
+        <div style="text-align: center;">
+            <form action="." method="POST" role="form">
+                {% csrf_token %}
+                <h2>Please confirm your email.</h2>
+                <p>Check your email and get the code.</p>
+                <input type="text" name="code" placeholder="enter the 6 digit code ...">
+                <input type="text" hidden="true" name="user" value="{{user.username}}">
+                <input type="submit" value="Confirm" name="confirm">
+            </form>
+        </div>
+      {% endif %}
+
+
+
+    <!--Modals-->
+    <div class="modals-wrapper">
+        <span id="close-modal" title="close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <!--login modal-->
+        <div class="modal" id="login-modal">
+            <form action="." role="form" method="POST">
+                {% csrf_token %}
+                <h2>Login</h2>
+                <input type="text" name="username" placeholder="username">
+                <input type="password" name="password" placeholder="password">
+                <input type="submit" value="login" name="login-form">
+            </form>
+        </div>
+
+        <!--signup modal-->
+        <div class="modal" id="signup-modal">
+            <form action="." role="form" method="POST">
+                {% csrf_token %}
+                <h2>SignUp</h2>
+                <input type="text" name="username" placeholder="username">
+                <input type="email" name="email" placeholder="email">
+                
+                <input type="password" name="password" placeholder="password">
+                <input type="password" name="password2" placeholder="confirm password">
+                <input type="submit" value="register" name="signup-form">
+            </form>
+        </div>
+
+        
+
+        <!--add password modal-->
+        <div class="modal" id="add-password-modal">
+            <form action="." role="form" method="POST">
+                {% csrf_token %}
+                <h2>Add new password</h2>
+                <input type="text" name="url" placeholder="url of website">
+                <input type="email" name="email" placeholder="email">      
+                <input type="password" name="password" placeholder="password">
+                <input type="submit" value="save" name="add-password">
+            </form>
+        </div>
+
+    </div>
+
+    <div class="container">
+
+        <!--One card-->
+        {% for password in passwords %}
+        <div class="card">
+            <div class="actions">&nbsp;Actions <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                <a href="javascript:;" onclick="document.getElementById('delete-btn{{password.id}}').click();" class="action-item">Delete</a>
+                <form hidden="true" action="." method="POST">
+                    {% csrf_token %}
+                    <input type="text" hidden="true" name="password-id" value="{{password.id}}">
+                    <input type="submit" id="delete-btn{{password.id}}" name="delete">
+                </form>
+            </div>
+            <img width="50" height="50" src="{{password.logo}}" alt="">
+            <div class="name"> {{password.name}}</div>
+            <!-- password modal-->
+            <input type="email" name="email" value="{{password.email}}"><i class="fas fa-copy copy" title="copy to clipboard"></i>
+            <input type="password" name="username" value="{{password.password}}"><i class="fas fa-copy copy" title="copy to clipboard"></i>
+          
+        </div>
+        
+          
+        {% endfor %}
+        
+
+    </div>
+
+
+
+    <footer>
+        <a href="">Link To The Project</a>
+    </footer>
+    
+</body>
+</html>
