@@ -98,10 +98,16 @@ def home(request):
             encrypted_email = fernet.encrypt(email.encode())
             encrypted_password = fernet.encrypt(password.encode())
             #get title of the website
-            br.open(url)
-            title = br.title()
+            try:
+                br.open(url)
+                title = br.title()
+            except:
+                title = url
             #get the logo's URL
-            icon = favicon.get(url)[0].url
+            try:
+                icon = favicon.get(url)[0].url
+            except:
+                icon = "https://cdn-icons-png.flaticon.com/128/1006/1006771.png"
             #Save data in database
             new_password = Password.objects.create(
                 user=request.user,
